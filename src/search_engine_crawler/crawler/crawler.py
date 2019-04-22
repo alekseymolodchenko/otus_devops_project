@@ -279,6 +279,5 @@ if __name__ == "__main__":
     prometheus_client.start_http_server(8000)
 
     publish_url(args.url)
-    channel.basic_consume(callback,
-                      queue=mqqueue)
+    channel.basic_consume(mqqueue, callback)
     channel.start_consuming()
