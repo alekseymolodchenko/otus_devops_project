@@ -5,7 +5,7 @@
 * [Terraform][] >= 0.11.10
 * [gcloud-sdk][]
 * [kubernetes-cli][]
-* tbu...
+* [Helm][] >= 2.13.1
 
 ## Usage
 
@@ -13,10 +13,11 @@
 2. [Создаем сервисный аккаунт][service-account],
 3. `terraform init` скачиваем нужные плагины,
 4. `terraform apply` выполняем провижинг кластера,
-5. `export GOOGLE_PROJECT=project-123456789`,
+5. `export GOOGLE_PROJECT=$(gcloud config get-value project)`,
 6. `gcloud config set project $GOOGLE_PROJECT` устанавливаем текущий проект,
 7. `gcloud container clusters list` (для просмотра списка кластеров),
-8. tbu....
+8. `make deploy-app` деплоим приложение в кластер,
+9. tbu ...
 
 Теперь можно получить доступ к сластеру Kubernetes через CLI: `kubectl
 cluster-info`.
@@ -27,12 +28,19 @@ cluster-info`.
 [kubernetes-cli]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
 [gke-api]: https://console.developers.google.com/apis/api/container.googleapis.com/overview?project=terraform-gke
 [service-account]: https://console.developers.google.com/
+[Helm]: https://helm.sh/
 
 ## Todo
 
  - [x] Добавить исходные код приложения;
  - [x] Контейнеризировать приложения UI и Crawler;
  - [x] Добавить привиженинг кластера k8s для terraform;
+ - [x] Добавлены Helm Charts для деплоя приложения;
+ - [ ] Добавить bucket для хранения стейта terraform;
+ - [ ] Добавить CI/CD Pipeline;
+ - [ ] Добавить мониторинг приложения;
+ - [ ] Добававить алертинг;
+ - [ ] Добавить описание проекта
 
 ## Author
 
