@@ -5,7 +5,7 @@ metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
     app: search-engine
-    component: {{ .Values.service.component }}
+    component: ui
     release: {{ .Release.Name }}
 spec:
   type: NodePort
@@ -15,5 +15,5 @@ spec:
     targetPort: {{ .Values.service.internalPort }}
   selector:
     app: search-engine
-    component: {{ .Values.service.component }}
+    component: ui
     release: {{ .Release.Name }}
