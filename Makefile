@@ -21,8 +21,7 @@ cluster-destroy:
 
 create-tiller:
 	@echo ">> Creating tiller service account"
-	$(K8S) create serviceaccount tiller --namespace kube-system
-	$(K8S) create clusterrolebinding tiller-role-binding --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+	$(K8S) apply -f $(K8S_DIR)/tiller.yml
 	helm init --service-account tiller
 
 deploy-gitlab: create-tiller
@@ -40,8 +39,12 @@ test: depend
 	@echo ">> running tests"
 	@python -m unittest discover -s tests/
 
-build:
-	@echo ">> building docker image"
-	@docker build -t "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" .
+docker-build:
+	@echo ">> building docker images"
+	cd src/search_engine_crawler ; make build
+	cd src/search_engine_ui ; make build
+
+docker-push:
+
 
 .PHONY: all
