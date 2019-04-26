@@ -1,0 +1,14 @@
+---
+service:
+  internalPort: 8000
+  externalPort: 8000
+
+image:
+  repository: amolodchenko/search_engine_ui
+  tag: latest
+
+databaseHost:
+
+appName: ui.py
+
+

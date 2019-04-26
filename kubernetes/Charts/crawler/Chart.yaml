@@ -1,0 +1,7 @@
+---
+name: crawler
+version: 1.0.0
+description: OTUS Search Engine App Crawler
+maintainers:
+  - name: Aleksey Molodchenko
+appVersion: 1.0

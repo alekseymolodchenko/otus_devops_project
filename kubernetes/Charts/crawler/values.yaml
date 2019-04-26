@@ -1,0 +1,19 @@
+---
+service:
+  internalPort: 8000
+  externalPort: 8000
+image:
+  repository: amolodchenko/search_engine_crawler
+  tag: latest
+
+databaseHost:
+
+messageBrokerHost:
+
+excludeURLs: .*github.com
+
+url: https://vitkhab.github.io/search_engine_test_site/
+
+rabbitmq:
+  username: user
+  password: password

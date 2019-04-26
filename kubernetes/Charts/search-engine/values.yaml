@@ -1,0 +1,23 @@
+ui:
+  image:
+    repository: amolodchenko/search_engine_ui
+    tag: latest
+  service:
+    externalPort: 8000
+    internalPort: 8000
+
+crawler:
+  image:
+    repository: amolodchenko/search_engine_crawler
+    tag: latest
+    service:
+      externalPort: 8000
+      internalPort: 8000
+    rabbitmq:
+      username: user
+      password: password
+
+rabbitmq:
+  rabbitmq:
+    username: user
+    password: password

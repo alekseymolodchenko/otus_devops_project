@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ui.fullname" . }}
+  labels:
+    app: search-engine
+    component: ui
+    release: {{ .Release.Name }}
+spec:
+  replicas: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: search-engine
+      component: ui
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: {{ template "ui.fullname" . }}
+      labels:
+        app: search-engine
+        component: ui
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - image:  "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        name: {{ template "ui.fullname" . }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+          name: {{ template "ui.fullname" . }}
+          protocol: TCP
+        env:
+        - name: MONGO
+          value: {{ .Values.databaseHost | default (printf "%s-mongodb" .Release.Name) }}
+        - name: FLASK_APP
+          value: {{ .Values.appName }}
