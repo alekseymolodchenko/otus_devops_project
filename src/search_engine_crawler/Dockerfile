@@ -8,8 +8,7 @@ COPY requirements.txt /crawler
 
 RUN apk --no-cache add gcc=6.4.0-r9 musl-dev=1.1.19-r10 \
  && pip install -r /crawler/requirements.txt \
- && rm -rf /root/.cache \
- && rm -rf /crawler/requirements.txt
+ && rm -rf /root/.cache
 
 COPY /crawler /crawler
 RUN chown -R crawler:crawler /crawler && \
