@@ -96,6 +96,16 @@ resource "google_container_cluster" "primary" {
   provisioner "local-exec" {
     command = "gcloud container clusters get-credentials ${var.k8s_cluster_name}-${var.env} --zone ${var.zone}"
   }
+
+  provisioner "local-exec" {
+    when = "destroy"
+    on_failure = "continue"
+    command = <<EOT
+      kubectl config unset users.gke_${var.project}_${var.zone}_${var.k8s_cluster_name}-${var.env};
+      kubectl config unset contexts.gke_${var.project}_${var.zone}_${var.k8s_cluster_name}-${var.env};
+      kubectl config unset clusters.gke_${var.project}_${var.zone}_${var.k8s_cluster_name}-${var.env}
+   EOT
+  }
 }
 
 module "vpc" {
