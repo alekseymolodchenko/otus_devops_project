@@ -9,3 +9,5 @@ variables.json
 *.retry
 .gce_cache
 *.pyc
+*.tgz
+.lock
