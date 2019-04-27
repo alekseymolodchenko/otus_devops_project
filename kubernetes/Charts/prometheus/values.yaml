@@ -163,7 +163,7 @@ alertmanager:
 
     ## alertmanager data Persistent Volume size
     ##
-    size: 2Gi
+    size: 5Gi
 
     ## alertmanager data Persistent Volume Storage Class
     ## If defined, storageClassName: <storageClass>
@@ -564,7 +564,7 @@ server:
   global:
     ## How frequently to scrape targets by default
     ##
-    scrape_interval: 1m
+    scrape_interval: 30s
     ## How long until a scrape request times out
     ##
     scrape_timeout: 10s
@@ -618,7 +618,7 @@ server:
   ingress:
     ## If true, Prometheus server Ingress will be created
     ##
-    enabled: false
+    enabled: true
 
     ## Prometheus server Ingress annotations
     ##
@@ -636,6 +636,7 @@ server:
     hosts: []
     #   - prometheus.domain.com
     #   - domain.com/prometheus
+    search-engine-prometheus
 
     ## Prometheus server Ingress TLS configuration
     ## Secrets must be manually created in the namespace
@@ -782,7 +783,7 @@ server:
 pushgateway:
   ## If false, pushgateway will not be installed
   ##
-  enabled: true
+  enabled: false
 
   ## pushgateway container name
   ##
@@ -976,6 +977,62 @@ serverFiles:
         static_configs:
           - targets:
             - localhost:9090
+
+      - job_name: 'search-engine-production'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_service_label_app, __meta_kubernetes_namespace]
+            action: keep
+            regex: search-engine;(production)+
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: kubernetes_name
+
+      - job_name: 'search-engine-stage'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_service_label_app, __meta_kubernetes_namespace]
+            action: keep
+            regex: search-engine;(staging)+
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: kubernetes_name
+
+      - job_name: 'crawler-endpoints'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_service_label_component]
+            action: keep
+            regex: crawler
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: kubernetes_name
+
+      - job_name: 'ui-endpoints'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_service_label_component]
+            action: keep
+            regex: ui
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: kubernetes_name
 
       # A scrape configuration for running Prometheus on a Kubernetes cluster.
       # This uses separate scrape configs for cluster components (i.e. API server, node)
