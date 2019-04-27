@@ -575,6 +575,7 @@ server:
   ## Additional Prometheus server container arguments
   ##
   extraArgs: {}
+  #  storage.local.retention: 744h
 
   ## Additional Prometheus server Volume mounts
   ##
@@ -633,10 +634,11 @@ server:
     ## Prometheus server Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
     ##
-    hosts: []
+    hosts:
+      - search-engine-prometheus
     #   - prometheus.domain.com
     #   - domain.com/prometheus
-    search-engine-prometheus
+
 
     ## Prometheus server Ingress TLS configuration
     ## Secrets must be manually created in the namespace
@@ -977,6 +979,9 @@ serverFiles:
         static_configs:
           - targets:
             - localhost:9090
+      - job_name: etcd
+        static_configs:
+          - targets: ['10.164.15.213:2379','10.164.15.214:2379','10.240.0.34:2379']
 
       - job_name: 'search-engine-production'
         kubernetes_sd_configs:

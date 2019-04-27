@@ -30,10 +30,22 @@ deploy-gitlab: create-tiller
 	helm init --service-account gitlab-admin
 	cd $(CHARTS_DIR)/gitlab-omnibus ; helm install --name gitlab . -f values.yaml
 
-deploy-app: create-tiller
-	@echo ">> Deploying Search Engine application to cluster"
+deploy-production: create-tiller
+	@echo ">> Deploying Search Engine application to Production"
 	cd kubernetes/Charts/search-engine ; helm dep update
-	cd kubernetes/Charts ; helm install search-engine --name se
+	cd kubernetes/Charts ; helm upgrade prod --namespace production search-engine --install
+
+deploy-staging: create-tiller
+	@echo ">> Deploying Search Engine application to Staging"
+	cd kubernetes/Charts/search-engine ; helm dep update
+	cd kubernetes/Charts ; helm upgrade stage --namespace staging search-engine --install
+
+deploy-ingress:
+	helm install stable/nginx-ingress --name nginx
+
+deploy-monitoring:
+	helm upgrade prom stable/prometheus --namespace monitoring -f kubernetes/Charts/prometheus/values.yaml --install
+	helm upgrade grafana stable/grafana --namespace monitoring -f kubernetes/Charts/grafana/values.yaml --install
 
 test: depend
 	@echo ">> running tests"
