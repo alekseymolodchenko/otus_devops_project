@@ -4,27 +4,32 @@ TF_GET=$(TF) get
 TF_APPLY=$(TF) apply -auto-approve
 TF_DESTROY=$(TF) destroy -auto-approve
 TF_VARS_FILE=terraform.tfvars
-TF_DIR=./terraform
+TF_DIR=terraform
 K8S=kubectl
 K8S_DIR=kubernetes
 CHARTS_DIR=$(K8S_DIR)/Charts
 TILLER_EXIST := $(shell kubectl get pods -n kube-system | grep -Ec "tiller.*Running")
+HELM_INIT=helm init
 
-all: cluster-create deploy-app deploy-ingress deploy-monitoring
+.PHONY: all cluster-create cluster-destroy create-tiller deploy-gitlab
+
+all: cluster-create deploy-app deploy-ingress deploy-monitoring deploy-app deploy-production deploy-staging deploy-ingress
 
 cluster-create:
 	@echo ">> Creating Kubernetes Cluster"
-	$(TF_INIT) $(TF_DIR) ; $(TF_GET) $(TF_DIR) ; $(TF_APPLY) -var-file=$(TF_DIR)/$(TF_VARS_FILE) $(TF_DIR)
+#	gsutil mb gs://tf-otus-crawler-project/
+	cd $(TF_DIR) && $(TF_INIT) ; $(TF_GET) ; $(TF_APPLY)
 
 cluster-destroy:
 	@echo ">> Removing Kubernetes Cluster"
-	$(TF_DESTROY) -var-file=$(TF_DIR)/$(TF_VARS_FILE) $(TF_DIR)
+	cd $(TF_DIR) && $(TF_DESTROY)
 
 create-tiller:
 ifeq ($(TILLER_EXIST), 0)
 	@echo ">> Creating tiller service account"
 	$(K8S) apply -f $(K8S_DIR)/manifests/tiller.yml
-	helm init --service-account tiller
+	$(HELM_INIT) --service-account tiller
+	sleep 5
 else
 	@echo ">> Tiller account exits"
 endif
@@ -32,20 +37,20 @@ endif
 deploy-gitlab: create-tiller
 	@echo ">> Deploying Gitlab to Kubernetes"
 	$(K8S) apply -f $(K8S_DIR)/manifests/gitlab.yml
-	helm init --service-account gitlab-admin
-	cd $(CHARTS_DIR)/gitlab-omnibus ; helm install --name gitlab . -f values.yaml
+	$(HELM_INIT) --service-account gitlab-admin
+	cd $(CHARTS_DIR)/gitlab-omnibus && helm install --name gitlab . -f values.yaml
 
 deploy-app: deploy-production deploy-staging
 
 deploy-production: create-tiller
 	@echo ">> Deploying Search Engine application to Production"
-	cd kubernetes/Charts/search-engine ; helm dep update
-	cd kubernetes/Charts ; helm upgrade prod --namespace production search-engine --install
+	cd $(CHARTS_DIR)/search-engine && helm dep update
+	cd $(CHARTS_DIR) && helm upgrade prod search-engine --install --namespace production
 
 deploy-staging: create-tiller
 	@echo ">> Deploying Search Engine application to Staging"
-	cd kubernetes/Charts/search-engine ; helm dep update
-	cd kubernetes/Charts ; helm upgrade stage --namespace staging search-engine --install
+	cd $(CHARTS_DIR)/search-engine && helm dep update
+	cd $(CHARTS_DIR) && helm upgrade stage search-engine --install --namespace staging
 
 deploy-ingress: create-tiller
 	helm install stable/nginx-ingress --name nginx
@@ -53,11 +58,11 @@ deploy-ingress: create-tiller
 deploy-monitoring: deploy-prometheus deploy-grafana
 
 deploy-prometheus: create-tiller
-	helm upgrade prom stable/prometheus --namespace monitoring -f kubernetes/Charts/prometheus/values.yaml --install
+	helm upgrade prom stable/prometheus -f $(CHARTS_DIR)/prometheus/values.yaml --install --namespace monitoring
 
 deploy-grafana: create-tiller
-	helm upgrade grafana stable/grafana --namespace monitoring -f kubernetes/Charts/grafana/values.yaml --install
-	kubectl apply -f kubernetes/manifests/grafana --namespace monitoring
+	helm upgrade grafana stable/grafana -f $(CHARTS_DIR)/grafana/values.yaml --install --namespace monitoring
+	$(K8S) apply -f $(K8S_DIR)/manifests/grafana --namespace monitoring
 
 test: depend
 	@echo ">> running tests"
@@ -69,6 +74,3 @@ docker-build:
 	cd src/search_engine_ui ; make build
 
 docker-push:
-
-
-.PHONY: all
