@@ -1,7 +1,6 @@
 stages:
   - lint
   - test
-  - coverage
   - build
 
 lint_terraform:
@@ -18,12 +17,18 @@ lint_terraform:
     - terraform init
     - terraform validate
     - tflint
+  only:
+    - triggers
+    - branches
 
 lint_dockerfile:
   stage: lint
   image: hadolint/hadolint:latest-debian
   script:
     - find . -name "Dockerfile*" | xargs hadolint
+  only:
+    - triggers
+    - branches
 
 test_ui:
   stage: test
@@ -34,6 +39,9 @@ test_ui:
     - python -m unittest discover -s tests/
     - coverage run -m unittest discover -s tests/
     - coverage report --include ui/ui.py
+  only:
+    - triggers
+    - branches
 
 test_crawler:
   stage: test
@@ -44,3 +52,6 @@ test_crawler:
     - python -m unittest discover -s tests/
     - coverage run -m unittest discover -s tests/
     - coverage report --include crawler/crawler.py
+  only:
+    - triggers
+    - branches
