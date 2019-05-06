@@ -91,7 +91,7 @@ ingress:
   labels: {}
   path: /
   hosts:
-    - search-engine-grafana
+    - search-engine-app.io
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

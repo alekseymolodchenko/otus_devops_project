@@ -11,3 +11,4 @@ variables.json
 *.pyc
 *.tgz
 .lock
+.tgz

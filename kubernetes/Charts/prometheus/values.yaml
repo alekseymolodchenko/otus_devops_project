@@ -635,7 +635,7 @@ server:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - search-engine-prometheus
+      - prometheus.search-engine-app.io
     #   - prometheus.domain.com
     #   - domain.com/prometheus
 
