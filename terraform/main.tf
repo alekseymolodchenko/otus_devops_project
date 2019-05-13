@@ -98,8 +98,9 @@ resource "google_container_cluster" "primary" {
   }
 
   provisioner "local-exec" {
-    when = "destroy"
+    when       = "destroy"
     on_failure = "continue"
+
     command = <<EOT
       kubectl config unset users.gke_${var.project}_${var.zone}_${var.k8s_cluster_name}-${var.env};
       kubectl config unset contexts.gke_${var.project}_${var.zone}_${var.k8s_cluster_name}-${var.env};
