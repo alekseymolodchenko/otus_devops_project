@@ -27,18 +27,17 @@ cluster-destroy:
 create-tiller:
 ifeq ($(TILLER_EXIST), 0)
 	@echo ">> Creating tiller service account"
-	$(K8S) apply -f $(K8S_DIR)/manifests/tiller.yml
+	$(K8S) apply -f $(K8S_DIR)/manifests/tiller/tiller.yml
 	$(HELM_INIT) --service-account tiller
 	sleep 5
 else
 	@echo ">> Tiller account exits"
 endif
 
+
 deploy-gitlab: create-tiller
 	@echo ">> Deploying Gitlab to Kubernetes"
-	$(K8S) apply -f $(K8S_DIR)/manifests/gitlab.yml
-	$(HELM_INIT) --service-account gitlab-admin
-	cd $(CHARTS_DIR)/gitlab-omnibus && helm install --name gitlab . -f values.yaml
+	cd $(CHARTS_DIR)/gitlab && helm install --name gitlab . -f values.yaml
 
 deploy-app: deploy-production deploy-staging
 
