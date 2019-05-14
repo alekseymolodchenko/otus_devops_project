@@ -28,9 +28,19 @@ spec:
       - image:  "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         name: {{ template "ui.fullname" . }}
         ports:
-        - containerPort: {{ .Values.service.internalPort }}
-          name: {{ template "ui.fullname" . }}
+        - name: ui
+          containerPort: {{ .Values.service.internalPort }}
           protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: ui
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: ui
+          initialDelaySeconds: 15
+          periodSeconds: 20
         env:
         - name: MONGO
           value: {{ .Values.databaseHost | default (printf "%s-mongodb" .Release.Name) }}
